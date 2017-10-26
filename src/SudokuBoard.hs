@@ -1,6 +1,7 @@
 module SudokuBoard where
 
-  type Position = (Integer, Integer)
+  import qualified ListUtils as LU
+  type Position = (Int, Int)
   type Rows = [[Maybe Integer]]
   type Columns = [[Maybe Integer]]
   type Boxes = [[Maybe Integer]]
@@ -25,10 +26,10 @@ module SudokuBoard where
   makeBoxesFromRows :: Rows -> Boxes
   makeBoxesFromRows rows =
     let rowsOfBoxes = partitionByThree rows
-        split = map (\groupOfRows -> map partitionByThree groupOfRows) rowsOfBoxes
-        splitReduce = map (foldl1 (++)) split
-        boxes = map makeBox splitReduce
-    in foldl1 (++) boxes
+        split = map (map partitionByThree) rowsOfBoxes
+        splitReduce = map concat split
+        groupOfBoxes = map makeBox splitReduce
+    in concat groupOfBoxes
 
   initializeBoardFromRows :: Rows -> Board
   initializeBoardFromRows rows =
@@ -38,7 +39,7 @@ module SudokuBoard where
            }
 
   boardLookup :: Board -> Position -> Maybe Integer
-  boardLookup (Board {columns=columns}) (x, y) = columns !! xInt !! yInt
+  boardLookup Board {columns=columns} (x, y) = columns !! xInt !! yInt
     where xInt = fromIntegral x
           yInt = fromIntegral y
 
@@ -49,30 +50,28 @@ module SudokuBoard where
     | x < 3 = 6          | x < 6 = 7          | otherwise = 8
 
   findBoxPosition :: Position -> Int
-  findBoxPosition (x, y) = fromIntegral(3 * (xPos) + yPos)
+  findBoxPosition (x, y) = fromIntegral(3 * xPos + yPos)
     where xPos = x `mod` 3
           yPos = y `mod` 3
 
   insertRow :: Rows -> Position -> Integer -> Rows
   insertRow rows (x, y) number =
     let (aboveR, row:belowR) = splitAt (fromIntegral y) rows
-        (leftR, _:rightR) = splitAt (fromIntegral x) row
-    in aboveR ++ (leftR ++ (Just number):rightR):belowR
+    in aboveR ++ LU.change row x (Just number):belowR
 
   insertCol :: Columns -> Position -> Integer -> Columns
   insertCol columns (x, y) number =
     let (leftC, col:rightC) = splitAt (fromIntegral x) columns
-        (aboveC, _:belowC) = splitAt (fromIntegral y) col
-    in leftC ++ (aboveC ++ (Just number):belowC):rightC
+    in leftC ++ LU.change col y (Just number):rightC
 
   insertBox :: Boxes -> Position -> Integer -> Boxes
   insertBox boxes position number =
     let (beforeBoxes, box:afterBoxes) = splitAt (findBox position) boxes
         (beforeNums, _:afterNums) = splitAt (findBoxPosition position) box
-    in beforeBoxes ++ (beforeNums ++ (Just number):afterNums):afterBoxes
+    in beforeBoxes ++ (beforeNums ++ Just number:afterNums):afterBoxes
 
   insert :: Board -> Position -> Integer -> Board
-  insert board@(Board {rows=rows, columns=columns, boxes=boxes}) position@(x, y) number =
+  insert board@Board {rows=rows, columns=columns, boxes=boxes} position@(x, y) number =
     case boardLookup board position of
       Just _ -> error "already filled"
       Nothing -> Board { rows = insertRow rows position number
