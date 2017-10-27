@@ -6,7 +6,7 @@ module SudokuBoard where
   type Columns = [[Maybe Integer]]
   type Boxes = [[Maybe Integer]]
 
-  data Board = Board {rows :: Rows, columns :: Columns, boxes :: Boxes} deriving (Show)
+  data Board = Board {rows :: Rows, columns :: Columns, boxes :: Boxes} deriving (Show, Eq)
 
   makeColumnsFromRows :: Rows -> Columns
   makeColumnsFromRows rows = map (\i -> map (!! i) rows) [0..8]
@@ -26,10 +26,7 @@ module SudokuBoard where
   makeBoxesFromRows :: Rows -> Boxes
   makeBoxesFromRows rows =
     let rowsOfBoxes = partitionByThree rows
-        split = map (map partitionByThree) rowsOfBoxes
-        splitReduce = map concat split
-        groupOfBoxes = map makeBox splitReduce
-    in concat groupOfBoxes
+    in concatMap (makeBox . concatMap partitionByThree) rowsOfBoxes
 
   initializeBoardFromRows :: Rows -> Board
   initializeBoardFromRows rows =
