@@ -19,7 +19,7 @@ library
                      , Lib
   other-modules:       ListUtils
   build-depends:       base >= 4.7 && < 5
-                     , HUnit
+                     , containers
   default-language:    Haskell2010
 
 executable SudokuSolver-exe

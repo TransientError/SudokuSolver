@@ -86,4 +86,6 @@ module TestSudokuBoard where
              , "testInitializeBoardFromRows" ~: sampleBoard ~=? initializeBoardFromRows sampleRows
              , "testBoardLookup" ~: Just 8 ~=? boardLookup sampleBoard (1, 0)
              , "testInsert" ~: sampleInsertedBoard ~=? insert sampleBoard (0, 0) 1
+             , "testValidateBoard" ~: True ~=? validateBoard sampleBoard
+             , "testValidateBadBoard" ~: False ~=? validateBoard (insert sampleBoard (0, 0) 7)
              ]

@@ -1,6 +1,8 @@
 module SudokuBoard where
 
   import qualified ListUtils as LU
+  import qualified Data.Set as S
+  import qualified Data.Maybe as M
   type Position = (Int, Int)
   type Rows = [[Maybe Integer]]
   type Columns = [[Maybe Integer]]
@@ -75,3 +77,14 @@ module SudokuBoard where
                        , columns = insertCol columns position number
                        , boxes = insertBox boxes position number
                        }
+
+  hasNoDuplicates :: Eq a => Ord a => [Maybe a] -> Bool
+  hasNoDuplicates xs = length xs' == (length . S.toList . S.fromList) xs'
+    where xs' = filter M.isJust xs
+
+  validate :: Eq a => Ord a => [[Maybe a]] -> Bool
+  validate = all hasNoDuplicates
+
+  validateBoard :: Board -> Bool
+  validateBoard Board {rows=rows, columns=columns, boxes=boxes} =
+    validate rows && validate columns && validate boxes
