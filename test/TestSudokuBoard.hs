@@ -80,6 +80,9 @@ module TestSudokuBoard where
   sampleInsertedBoard :: Board
   sampleInsertedBoard = Board {rows = sampleInsertedRows, columns = sampleInsertedCols, boxes = sampleInsertedBoxes}
 
+  sampleFullRows :: Rows
+  sampleFullRows = replicate 9 (replicate 9 (Just 1))
+
   sudokuBoardTests =
     TestList [ "testMakeColumnsFromRows" ~: sampleCols ~=? makeColumnsFromRows sampleRows
              , "testMakeBoxesFromRows" ~: sampleBoxes ~=? makeBoxesFromRows sampleRows
@@ -88,4 +91,7 @@ module TestSudokuBoard where
              , "testInsert" ~: sampleInsertedBoard ~=? insert sampleBoard (0, 0) 1
              , "testValidateBoard" ~: True ~=? validateBoard sampleBoard
              , "testValidateBadBoard" ~: False ~=? validateBoard (insert sampleBoard (0, 0) 7)
+             , "testIsFull" ~: True ~=? isFull (initializeBoardFromRows sampleFullRows)
+             , "testIsNotFull" ~: False ~=? isFull sampleBoard
+             , "testNextEmpty" ~: (2, 0) ~=? findNextEmpty sampleInsertedBoard
              ]

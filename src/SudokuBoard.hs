@@ -88,3 +88,14 @@ module SudokuBoard where
   validateBoard :: Board -> Bool
   validateBoard Board {rows=rows, columns=columns, boxes=boxes} =
     validate rows && validate columns && validate boxes
+
+  isFull :: Board -> Bool
+  isFull Board {rows = rows} = all (all M.isJust) rows
+
+  findNextEmpty :: Board -> Position
+  findNextEmpty board = if isFull board then error "board is full" else findNextEmpty' board (0, 0)
+    where findNextEmpty' board position =
+           case (position, boardLookup board position) of
+                (_, Nothing) -> position
+                ((8, j), Just _) -> findNextEmpty' board (0, j + 1)
+                ((i, j), Just _) -> findNextEmpty' board (i + 1, j)
